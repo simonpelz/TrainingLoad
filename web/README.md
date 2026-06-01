@@ -44,6 +44,9 @@ npx shadcn@latest add button card
 
 ## Status
 
-WP0 (scaffold) done. Next: WP1 — port the CTL/ATL/TSB engine to TypeScript
-with parity tests against the Python implementation in `../desktop`.
+- **WP0** — scaffold ✅
+- **WP1** — CTL/ATL/TSB engine in [`src/core/`](src/core) with Vitest parity
+  tests against the Python implementation (`npm test`) ✅
+- **WP2** — upload + chart UI (next)
+
 See [`../docs/ROADMAP.md`](../docs/ROADMAP.md).
