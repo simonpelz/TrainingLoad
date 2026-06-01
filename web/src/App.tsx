@@ -98,7 +98,9 @@ function App() {
               {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </button>
             <a
-              href="https://github.com/"
+              href="https://github.com/YOUR-USERNAME/TrainingLoad"
+              target="_blank"
+              rel="noreferrer"
               className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
               title="GitHub"
             >
