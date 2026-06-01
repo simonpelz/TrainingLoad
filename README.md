@@ -1,8 +1,7 @@
-# Training Load Viewer
+# Training Load
 
-A small, self-contained desktop app that shows your **Fitness, Fatigue, and Form**
-from training data — a free, local replacement for the Strava / TrainingPeaks
-"Fitness & Freshness" chart.
+See your **Fitness, Fatigue, and Form** from your training data — a free,
+private replacement for the Strava / TrainingPeaks "Fitness & Freshness" chart.
 
 Point it at one or more activity CSV exports and it plots:
 
@@ -14,73 +13,68 @@ Point it at one or more activity CSV exports and it plots:
   ready; negative = fatigued.
 - **TSS** — the raw daily Training Stress Score, drawn as bars.
 
-It also **forecasts** the curves forward (assuming you do nothing) so you can see
-how your form will recover over the coming days.
+It also **forecasts** the curves forward so you can see how your form recovers
+over the coming days.
+
+## Two ways to use it
+
+| | What | Status |
+|---|---|---|
+| [`web/`](web/) | **Browser app** — drag in a CSV, see your curves. Runs entirely client-side; your data never leaves your browser. Will be hosted on GitHub Pages. | 🚧 In progress (scaffolded) |
+| [`desktop/`](desktop/) | **Python desktop app** (Tkinter + Matplotlib). The original, offline option. | ✅ Working |
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the plan.
 
 ## How it works
 
-For each calendar day the app sums the `TSS` of all activities, fills rest days
-with zero, and runs a recursive EWMA:
+For each calendar day, sum the `TSS` of all activities, fill rest days with
+zero, and run a recursive EWMA:
 
 ```
-alpha = 1 − exp(−1 / tau)
+alpha       = 1 − exp(−1 / tau)
 value_today = value_yesterday + alpha * (tss_today − value_yesterday)
 ```
 
-with `tau = 42` for CTL and `tau = 7` for ATL. Both time constants are
-adjustable in the UI.
+with `tau = 42` for CTL (fitness) and `tau = 7` for ATL (fatigue);
+`TSB = CTL − ATL`. Both time constants are adjustable.
 
 ## Input data
 
-The app reads CSV files that have at least these two columns:
+Any CSV with at least two columns works:
 
-- `WorkoutDay` — the date of the activity (any format pandas can parse)
-- `TSS` — the Training Stress Score for that activity (missing/blank = 0)
+- `WorkoutDay` — the date of the activity
+- `TSS` — the Training Stress Score (missing/blank = 0)
 
-Any other columns are ignored, so a raw **TrainingPeaks activity export** works
-as-is. Multiple files can be loaded at once and are merged by date.
+Other columns are ignored, so a raw **TrainingPeaks activity export** works
+as-is, and multiple files merge by date.
 
-> Your personal training CSVs are intentionally **git-ignored** — this repo
-> contains only the app, never your data.
+> Personal training CSVs are intentionally **git-ignored** — this repo contains
+> only the app, never your data.
 
-## Install
+## Run the desktop app
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
+cd desktop
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 # On Debian/Ubuntu, tkinter is a separate system package:
 sudo apt install python3-tk
+./run.sh            # or: python training_load_app.py
 ```
 
-## Run
+If a `default.csv` exists in the working directory it loads automatically on
+startup. Then click **Load CSV(s)…** to pick your own export(s).
+
+## Run the web app
 
 ```bash
-python training_load_app.py
+cd web
+npm install
+npm run dev         # http://localhost:5173
 ```
 
-or use the helper script:
-
-```bash
-./run.sh
-```
-
-Then click **Load CSV(s)…** and select your activity export(s). If a file named
-`default.csv` exists in the working directory it is loaded automatically on
-startup.
-
-## Using the viewer
-
-- **τ_CTL / τ_ATL** — change the fitness/fatigue time constants, then
-  **Recompute & Plot**.
-- **Future days** — how far to project the curves forward.
-- **TSS / CTL / ATL / TSB** checkboxes — toggle each series on or off.
-- **View** dropdown / **Start–End** date pickers — zoom to a timeframe.
-- **Scale Y to TSS / TSB** — adjust the y-axis range.
-- Hover over the chart for exact daily values.
-- **Save CSV** exports the computed daily metrics; **Save Plot PNG** exports the
-  current chart.
+See [`web/README.md`](web/README.md) for details.
 
 ## License
 
-Not yet specified.
+[MIT](LICENSE) © Simon Pelz

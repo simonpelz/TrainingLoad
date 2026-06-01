@@ -1,22 +1,28 @@
-# ---- Personal training data (never publish) ----
-*.csv
-old csvs/
-Charts/
+# ---- Personal training data at repo root (never publish) ----
+# Anchored to root so sample datasets under web/ are still tracked.
+/*.csv
+/old csvs/
+/Charts/
 
-# ---- Virtual environments ----
+# ---- Python / virtualenvs ----
 .venv/
 venv/
 env/
 ENV/
 trainingload/
-
-# ---- Python ----
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
+
+# ---- Node / web ----
+node_modules/
+web/dist/
+dist/
+*.local
+.vite/
 
 # ---- Editors / OS ----
 .idea/
