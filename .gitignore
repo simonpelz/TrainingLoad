@@ -22,6 +22,3 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
-
-# ---- Misplaced sub-project (moved out of this repo) ----
-AugMult-DP-NLP/
