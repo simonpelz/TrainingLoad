@@ -13,7 +13,7 @@ export const DEFAULT_TAU_ATL = 7
  * for forecasting, then run the recursive EWMA over the whole range. Days
  * beyond the last real day are flagged `isForecast`.
  *
- * @param daily map of day key -> summed TSS (e.g. from {@link aggregateDaily})
+ * @param daily map of day key to summed TSS (e.g. from {@link aggregateDaily})
  */
 export function computeMetrics(
   daily: Map<string, number>,

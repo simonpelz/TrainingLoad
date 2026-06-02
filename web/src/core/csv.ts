@@ -23,7 +23,7 @@ function canon(s: string): string {
 /** Pick the column whose canonical name best matches the given hints. */
 function pickColumn(columns: string[], hints: string[]): string | null {
   const canonCols = columns.map((c) => ({ raw: c, key: canon(c) }))
-  // Exact match first (e.g. "WorkoutDay" -> "workoutday").
+  // Exact match first (e.g. "WorkoutDay" becomes "workoutday").
   for (const hint of hints) {
     const exact = canonCols.find((c) => c.key === hint)
     if (exact) return exact.raw

@@ -124,7 +124,7 @@ export function LoadChart({ metrics, visible, dark, timeframe, onReady }: LoadCh
             `<div>${dot(c)}${label}: <b>${v.toFixed(1)}</b></div>`
           return (
             `<div style="font-weight:600;margin-bottom:4px">${p.date}${
-              p.isForecast ? ' - forecast' : ''
+              p.isForecast ? ' (forecast)' : ''
             }</div>` +
             (p.isForecast ? '' : rowHtml(tssColor, 'TSS', p.tss)) +
             rowHtml(COLORS.fitness, 'Fitness', p.ctl) +

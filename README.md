@@ -8,7 +8,7 @@ Load a workout CSV and the app shows your CTL (fitness), ATL (fatigue), and TSB
 client-side, so your training data never leaves your device.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[Live demo](https://simonpelz.github.io/TrainingLoad/)
+[▶ Live demo](https://simonpelz.github.io/TrainingLoad/)
 
 ![Training Load dashboard](docs/screenshots/dashboard-dark.png)
 

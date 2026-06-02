@@ -17,7 +17,7 @@ export function interpretForm(tsb: number): FormZone {
     return {
       label: 'Very fresh',
       tone: 'fresh',
-      description: 'Well rested - fitness may fade if this lasts too long.',
+      description: 'Well rested, though fitness may fade if this lasts too long.',
     }
   if (tsb > 5)
     return { label: 'Fresh', tone: 'fresh', description: 'Tapered and race-ready.' }
@@ -31,12 +31,12 @@ export function interpretForm(tsb: number): FormZone {
     return {
       label: 'Productive',
       tone: 'tired',
-      description: 'Carrying useful fatigue - fitness is building.',
+      description: 'Carrying useful fatigue while fitness builds.',
     }
   return {
     label: 'Overreaching',
     tone: 'risk',
-    description: 'High fatigue - prioritise recovery to avoid burnout.',
+    description: 'High fatigue, so prioritise recovery to avoid burnout.',
   }
 }
 
