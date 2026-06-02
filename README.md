@@ -55,6 +55,13 @@ auto-detects common names; if it cannot, it asks you to pick the columns.
 | Strava | Use the bulk export (`activities.csv`) and map "Relative Effort" to the TSS column. The units differ from true TSS, but the fitness, fatigue and form trends are still meaningful. |
 | Anything else | Any CSV with a date and a numeric effort/load column works. Just map them. |
 
+For step-by-step export instructions, see [docs/EXPORTING.md](docs/EXPORTING.md).
+
+Most apps only export about a year at a time. You can drop several CSVs at once
+(or add them one by one) and the app stitches them into a single view, removing
+exact-duplicate activities so overlapping ranges are not double-counted. Use
+"Combined CSV" to download the stitched result as one file.
+
 No data to hand? Click "Try with sample data" to explore with a realistic
 synthetic dataset.
 

@@ -2,6 +2,12 @@
 export interface Activity {
   date: string | Date
   tss: number
+  /**
+   * Optional signature of the source row, used to drop exact duplicates when
+   * stitching overlapping exports together. Activities without a key are never
+   * treated as duplicates.
+   */
+  key?: string
 }
 
 /** One day of computed training-load metrics. */

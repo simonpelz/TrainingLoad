@@ -1,76 +1,91 @@
 import { useCallback, useRef, useState } from 'react'
-import { FileUp, Sparkles, Upload } from 'lucide-react'
+import { FilePlus2, Sparkles, Upload } from 'lucide-react'
 import { parseCsv, toActivities, type Activity, type ParsedCsv } from '@/core'
 import { cn } from '@/lib/utils'
 
+export interface LoadedFileInput {
+  name: string
+  activities: Activity[]
+}
+
 interface FileDropProps {
-  onLoad: (activities: Activity[], sourceName: string) => void
+  onAdd: (files: LoadedFileInput[]) => void
   onLoadSample: () => void
-  /** Compact variant for the in-dashboard "load another file" button. */
+  /** Compact "add more files" button used inside the dashboard. */
   compact?: boolean
 }
 
-export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProps) {
+interface Pending {
+  parsed: ParsedCsv[]
+  names: string[]
+}
+
+export function FileDrop({ onAdd, onLoadSample, compact = false }: FileDropProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // When auto-detection fails we ask the user to map the columns.
-  const [pending, setPending] = useState<{ parsed: ParsedCsv; name: string } | null>(null)
+  // When auto-detection fails we ask the user to map the columns once and
+  // apply that choice to every file in the batch (they share a format).
+  const [pending, setPending] = useState<Pending | null>(null)
   const [dateCol, setDateCol] = useState('')
   const [tssCol, setTssCol] = useState('')
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
+  const emit = useCallback(
+    (parsedAll: ParsedCsv[], names: string[], dateColumn: string, tssColumn: string) => {
+      const files: LoadedFileInput[] = []
+      parsedAll.forEach((p, i) => {
+        const activities = toActivities(p, dateColumn, tssColumn)
+        if (activities.length > 0) files.push({ name: names[i], activities })
+      })
+      if (files.length === 0) {
+        setError('No rows with a valid date were found in those files.')
+        return
+      }
+      onAdd(files)
       setError(null)
-      if (!files || files.length === 0) return
-      try {
-        const texts = await Promise.all(Array.from(files).map((f) => f.text()))
-        // Parse each file; use the first to detect columns.
-        const parsedAll = texts.map((t) => parseCsv(t))
-        const first = parsedAll[0]
-        const name =
-          files.length === 1 ? files[0].name : `${files.length} files`
+    },
+    [onAdd],
+  )
 
+  const handleFiles = useCallback(
+    async (fileList: FileList | null) => {
+      setError(null)
+      if (!fileList || fileList.length === 0) return
+      const fileArr = Array.from(fileList)
+      try {
+        const parsedAll = await Promise.all(fileArr.map(async (f) => parseCsv(await f.text())))
+        const names = fileArr.map((f) => f.name)
+        const first = parsedAll[0]
         if (first.dateColumn && first.tssColumn) {
-          const acts = parsedAll.flatMap((p) =>
-            toActivities(p, first.dateColumn!, first.tssColumn!),
-          )
-          if (acts.length === 0) {
-            setError('No rows with a valid date were found in that file.')
-            return
-          }
-          onLoad(acts, name)
+          emit(parsedAll, names, first.dateColumn, first.tssColumn)
         } else {
-          // Need manual mapping (fall back to the first file's columns).
-          setPending({ parsed: first, name })
+          setPending({ parsed: parsedAll, names })
           setDateCol(first.dateColumn ?? first.columns[0] ?? '')
           setTssCol(first.tssColumn ?? first.columns[1] ?? '')
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Could not read that file.')
       }
+      if (inputRef.current) inputRef.current.value = '' // allow re-selecting the same file
     },
-    [onLoad],
+    [emit],
   )
 
   const confirmMapping = () => {
     if (!pending) return
-    const acts = toActivities(pending.parsed, dateCol, tssCol)
-    if (acts.length === 0) {
-      setError('No rows with a valid date in the selected date column.')
-      return
-    }
-    onLoad(acts, pending.name)
+    emit(pending.parsed, pending.names, dateCol, tssCol)
     setPending(null)
   }
 
   // ----- Column-mapping prompt -----
   if (pending) {
+    const columns = pending.parsed[0]?.columns ?? []
     return (
       <div className="rounded-xl border border-border bg-card p-6">
         <p className="font-medium">Which columns should we use?</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          We couldn&apos;t auto-detect them in <span className="font-mono">{pending.name}</span>.
+          We could not auto-detect them in{' '}
+          <span className="font-mono">{pending.names.join(', ')}</span>.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <label className="text-sm">
@@ -80,7 +95,7 @@ export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProp
               onChange={(e) => setDateCol(e.target.value)}
               className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5"
             >
-              {pending.parsed.columns.map((c) => (
+              {columns.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -94,7 +109,7 @@ export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProp
               onChange={(e) => setTssCol(e.target.value)}
               className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5"
             >
-              {pending.parsed.columns.map((c) => (
+              {columns.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -121,24 +136,28 @@ export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProp
     )
   }
 
-  // ----- Compact button (used inside the dashboard) -----
+  const fileInput = (
+    <input
+      ref={inputRef}
+      type="file"
+      accept=".csv,text/csv"
+      multiple
+      className="hidden"
+      onChange={(e) => handleFiles(e.target.files)}
+    />
+  )
+
+  // ----- Compact "add files" button (dashboard) -----
   if (compact) {
     return (
       <>
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".csv,text/csv"
-          multiple
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
+        {fileInput}
         <button
           onClick={() => inputRef.current?.click()}
           className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
         >
-          <FileUp className="size-4" />
-          Load CSV
+          <FilePlus2 className="size-4" />
+          Add CSV
         </button>
       </>
     )
@@ -147,14 +166,7 @@ export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProp
   // ----- Full drop zone (empty state) -----
   return (
     <div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv,text/csv"
-        multiple
-        className="hidden"
-        onChange={(e) => handleFiles(e.target.files)}
-      />
+      {fileInput}
       <div
         role="button"
         tabIndex={0}
@@ -176,20 +188,29 @@ export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProp
         )}
       >
         <Upload className="size-8 text-muted-foreground" />
-        <p className="mt-4 font-medium">Drag &amp; drop your activity CSV here</p>
+        <p className="mt-4 font-medium">Drag and drop your activity CSVs here</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Or click to browse. Works with TrainingPeaks, Strava and Garmin exports.
+          Or click to browse. Drop several at once to stitch multiple years together. Works with
+          TrainingPeaks, Strava and Garmin exports.
         </p>
       </div>
       {error && <p className="mt-3 text-center text-sm text-fatigue">{error}</p>}
-      <div className="mt-4 text-center">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
         <button
           onClick={onLoadSample}
-          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+          className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 font-medium hover:bg-muted"
         >
           <Sparkles className="size-4 text-form" />
           Try with sample data
         </button>
+        <a
+          href="https://github.com/simonpelz/TrainingLoad/blob/master/docs/EXPORTING.md"
+          target="_blank"
+          rel="noreferrer"
+          className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          How to export your data
+        </a>
       </div>
     </div>
   )

@@ -1,14 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Gauge, Github, ImageDown, Moon, ShieldCheck, Sun, Table2 } from 'lucide-react'
 import {
+  activityStats,
   aggregateDaily,
   computeMetrics,
+  dedupeActivities,
   generateSampleActivities,
   DEFAULT_TAU_CTL,
   DEFAULT_TAU_ATL,
-  type Activity,
 } from '@/core'
-import { FileDrop } from '@/components/FileDrop'
+import { FileDrop, type LoadedFileInput } from '@/components/FileDrop'
+import { FileList, type LoadedFile } from '@/components/FileList'
 import { StatusCards } from '@/components/StatusCards'
 import { Controls, type SeriesVisibility, type TimeframePreset } from '@/components/Controls'
 import { LoadChart } from '@/components/LoadChart'
@@ -18,9 +20,14 @@ const DEFAULT_FORECAST = 30
 
 type ChartInstance = { getDataURL: (opts?: Record<string, unknown>) => string }
 
+function newId(): string {
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2)
+}
+
 function App() {
-  const [activities, setActivities] = useState<Activity[] | null>(null)
-  const [sourceName, setSourceName] = useState('')
+  const [files, setFiles] = useState<LoadedFile[]>([])
   const [tauCtl, setTauCtl] = useState(DEFAULT_TAU_CTL)
   const [tauAtl, setTauAtl] = useState(DEFAULT_TAU_ATL)
   const [futureDays, setFutureDays] = useState(DEFAULT_FORECAST)
@@ -35,23 +42,32 @@ function App() {
 
   const chartRef = useRef<ChartInstance | null>(null)
 
+  // Stitch every loaded file together, dropping exact-duplicate rows so
+  // overlapping yearly exports are not double-counted.
+  const combined = useMemo(
+    () => dedupeActivities(files.flatMap((f) => f.activities)),
+    [files],
+  )
+  const combinedDays = useMemo(() => activityStats(combined).days, [combined])
+
   const metrics = useMemo(
     () =>
-      activities
-        ? computeMetrics(aggregateDaily(activities), { tauCtl, tauAtl, futureDays })
+      combined.length > 0
+        ? computeMetrics(aggregateDaily(combined), { tauCtl, tauAtl, futureDays })
         : [],
-    [activities, tauCtl, tauAtl, futureDays],
+    [combined, tauCtl, tauAtl, futureDays],
   )
 
-  const handleLoad = useCallback((acts: Activity[], name: string) => {
-    setActivities(acts)
-    setSourceName(name)
+  const handleAdd = useCallback((added: LoadedFileInput[]) => {
+    setFiles((prev) => [...prev, ...added.map((f) => ({ ...f, id: newId() }))])
   }, [])
 
   const handleSample = useCallback(() => {
-    setActivities(generateSampleActivities())
-    setSourceName('Sample data')
+    setFiles([{ id: newId(), name: 'Sample data', activities: generateSampleActivities() }])
   }, [])
+
+  const removeFile = (id: string) => setFiles((prev) => prev.filter((f) => f.id !== id))
+  const clearFiles = () => setFiles([])
 
   const toggleTheme = () => {
     const next = !dark
@@ -79,7 +95,10 @@ function App() {
     }
   }
 
-  const exportCsv = () => downloadText('training-load.csv', metricsToCsv(metrics))
+  // Export the stitched, computed daily series (real days only). This CSV is
+  // re-importable: WorkoutDay and TSS are auto-detected on the next upload.
+  const exportCsv = () =>
+    downloadText('training-load-combined.csv', metricsToCsv(metrics.filter((p) => !p.isForecast)))
 
   return (
     <div className="min-h-screen">
@@ -110,7 +129,7 @@ function App() {
         </div>
       </header>
 
-      {!activities ? (
+      {files.length === 0 ? (
         // ---------- Empty state ----------
         <main className="mx-auto max-w-3xl px-6 py-16">
           <section className="text-center">
@@ -119,7 +138,7 @@ function App() {
               Your data never leaves your browser
             </div>
             <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-              See your fitness, fatigue &amp; form
+              See your fitness, fatigue and form
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-lg text-muted-foreground">
               Drop in a TrainingPeaks, Strava or Garmin CSV export and watch your CTL, ATL and
@@ -128,32 +147,34 @@ function App() {
             </p>
           </section>
           <section className="mt-10">
-            <FileDrop onLoad={handleLoad} onLoadSample={handleSample} />
+            <FileDrop onAdd={handleAdd} onLoadSample={handleSample} />
           </section>
         </main>
       ) : (
         // ---------- Dashboard ----------
         <main className="mx-auto max-w-6xl space-y-5 px-6 py-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              Source: <span className="font-medium text-foreground">{sourceName}</span>
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={exportCsv}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-muted"
-              >
-                <Table2 className="size-4" /> CSV
-              </button>
-              <button
-                onClick={exportPng}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-muted"
-              >
-                <ImageDown className="size-4" /> PNG
-              </button>
-              <FileDrop onLoad={handleLoad} onLoadSample={handleSample} compact />
-            </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              onClick={exportCsv}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-muted"
+            >
+              <Table2 className="size-4" /> Combined CSV
+            </button>
+            <button
+              onClick={exportPng}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-muted"
+            >
+              <ImageDown className="size-4" /> PNG
+            </button>
+            <FileDrop onAdd={handleAdd} onLoadSample={handleSample} compact />
           </div>
+
+          <FileList
+            files={files}
+            combinedDays={combinedDays}
+            onRemove={removeFile}
+            onClear={clearFiles}
+          />
 
           <StatusCards metrics={metrics} />
 

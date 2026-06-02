@@ -62,7 +62,13 @@ export function toActivities(parsed: ParsedCsv, dateColumn: string, tssColumn: s
     const dateRaw = row[dateColumn]
     if (dateRaw == null || dateRaw.trim() === '') continue
     const tss = Number.parseFloat(row[tssColumn])
-    activities.push({ date: dateRaw, tss: Number.isFinite(tss) ? tss : 0 })
+    // The full row is the dedupe signature: identical activities appearing in
+    // two overlapping exports stringify the same and collapse to one.
+    activities.push({
+      date: dateRaw,
+      tss: Number.isFinite(tss) ? tss : 0,
+      key: JSON.stringify(row),
+    })
   }
   return activities
 }
