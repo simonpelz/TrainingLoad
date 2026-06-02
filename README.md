@@ -103,6 +103,15 @@ npm run build
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the project plan.
 
+## Disclaimer
+
+This project is not affiliated with, endorsed by, or sponsored by Strava,
+TrainingPeaks, Garmin or Peaksware. All product names and trademarks are the
+property of their respective owners and are used only to describe compatibility
+and context. TSS, CTL, ATL and TSB are training-load metrics drawn from the
+sports-science literature and from those platforms. The app is provided for
+informational purposes only and is not medical, training or coaching advice.
+
 ## License
 
 Licensed under the [MIT License](LICENSE). Copyright Simon Pelz.
