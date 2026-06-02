@@ -4,7 +4,7 @@ import { computeMetrics } from './metrics'
 import type { MetricsPoint } from './types'
 
 // Golden output from the reference Python implementation
-// (desktop/training_load_app.py · extend_series_with_future, tau_ctl=42,
+// (desktop/training_load_app.py - extend_series_with_future, tau_ctl=42,
 // tau_atl=7, future_days=3) for the same input activities used below.
 const GOLDEN: MetricsPoint[] = [
   { date: '2024-01-01', tss: 80, ctl: 1.8822650678, atl: 10.64976802, tsb: -8.7675029522, isForecast: false },

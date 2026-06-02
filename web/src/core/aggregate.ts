@@ -6,7 +6,7 @@ import { normalizeDayKey } from './dates'
  * `read_and_aggregate_multiple`: non-numeric/missing TSS counts as 0, and
  * rows with an unparseable date are dropped.
  *
- * @returns map of day key (`YYYY-MM-DD`) → summed TSS, for days with activity.
+ * @returns map of day key (`YYYY-MM-DD`) -> summed TSS, for days with activity.
  */
 export function aggregateDaily(activities: Activity[]): Map<string, number> {
   const daily = new Map<string, number>()

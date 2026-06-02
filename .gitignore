@@ -23,8 +23,26 @@ web/dist/
 dist/
 *.local
 .vite/
+*.tsbuildinfo
+
+# ---- Logs / local tooling config ----
+*.log
+.claude/
 
 # ---- Editors / OS ----
 .idea/
 .vscode/
 .DS_Store
+
+# ---- Shell / misc dotfiles (not part of this project) ----
+.bash_profile
+.bashrc
+.profile
+.zprofile
+.zshrc
+.gitconfig
+.gitmodules
+.mcp.json
+.ripgreprc
+.idea
+.vscode

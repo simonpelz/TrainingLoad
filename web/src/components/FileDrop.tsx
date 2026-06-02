@@ -178,7 +178,7 @@ export function FileDrop({ onLoad, onLoadSample, compact = false }: FileDropProp
         <Upload className="size-8 text-muted-foreground" />
         <p className="mt-4 font-medium">Drag &amp; drop your activity CSV here</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          …or click to browse. TrainingPeaks, Strava and Garmin exports all work.
+          ...or click to browse. TrainingPeaks, Strava and Garmin exports all work.
         </p>
       </div>
       {error && <p className="mt-3 text-center text-sm text-fatigue">{error}</p>}

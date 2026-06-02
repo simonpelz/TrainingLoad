@@ -98,7 +98,7 @@ function App() {
               {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </button>
             <a
-              href="https://github.com/YOUR-USERNAME/TrainingLoad"
+              href="https://github.com/simonpelz/TrainingLoad"
               target="_blank"
               rel="noreferrer"
               className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -123,8 +123,8 @@ function App() {
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-balance text-lg text-muted-foreground">
               Drop in a TrainingPeaks, Strava or Garmin CSV export and watch your CTL, ATL and
-              TSB curves — the fitness &amp; freshness chart you pay a subscription for, free and
-              private.
+              TSB curves. It is the fitness and freshness chart you pay a subscription for, free
+              and private.
             </p>
           </section>
           <section className="mt-10">
@@ -184,7 +184,7 @@ function App() {
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-6xl px-6 py-6 text-center text-sm text-muted-foreground">
-          Runs entirely in your browser · no upload, no account · MIT licensed
+          Runs entirely in your browser. No upload, no account. MIT licensed.
         </div>
       </footer>
     </div>

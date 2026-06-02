@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { ewma } from './ewma'
 
 // Golden values produced by the reference Python implementation
-// (desktop/training_load_app.py · ewma_recursive) over the filled series
+// (desktop/training_load_app.py - ewma_recursive) over the filled series
 // [80, 0, 100, 0, 60].
 const SERIES = [80, 0, 100, 0, 60]
 

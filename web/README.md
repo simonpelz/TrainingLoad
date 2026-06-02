@@ -1,4 +1,4 @@
-# Training Load — web app
+# Training Load - web app
 
 Private, browser-only Fitness / Fatigue / Form tracker (CTL / ATL / TSB).
 Vite + React + TypeScript + Tailwind + ECharts. All computation runs
@@ -44,9 +44,9 @@ npx shadcn@latest add button card
 
 ## Status
 
-- **WP0** — scaffold ✅
-- **WP1** — CTL/ATL/TSB engine in [`src/core/`](src/core) with Vitest parity
-  tests against the Python implementation (`npm test`) ✅
-- **WP2** — upload + chart UI (next)
+- **WP0** - scaffold
+- **WP1** - CTL/ATL/TSB engine in [`src/core/`](src/core) with Vitest parity
+  tests against the Python implementation (`npm test`)
+- **WP2** - upload + chart UI (next)
 
 See [`../docs/ROADMAP.md`](../docs/ROADMAP.md).

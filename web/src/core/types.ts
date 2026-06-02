@@ -10,11 +10,11 @@ export interface MetricsPoint {
   date: string
   /** Daily Training Stress Score (sum of all activities that day). */
   tss: number
-  /** Chronic Training Load — "fitness". */
+  /** Chronic Training Load - "fitness". */
   ctl: number
-  /** Acute Training Load — "fatigue". */
+  /** Acute Training Load - "fatigue". */
   atl: number
-  /** Training Stress Balance (ctl − atl) — "form". */
+  /** Training Stress Balance (ctl - atl) - "form". */
   tsb: number
   /** True for projected days beyond the last day with real data. */
   isForecast: boolean

@@ -14,7 +14,7 @@ function mulberry32(seed: number): () => number {
 }
 
 export interface SampleOptions {
-  /** Number of days of history to generate (default 540 ≈ 18 months). */
+  /** Number of days of history to generate (default 540 ~ 18 months). */
   days?: number
   /** Last day of the dataset as a `YYYY-MM-DD` key (default: today, UTC). */
   endDate?: string
@@ -28,7 +28,7 @@ export interface SampleOptions {
  *
  * The shape: an endurance athlete's week (easy weekdays, a long weekend ride,
  * ~2 rest days), with build/recovery cycles and a 10-day taper at the end so
- * the form (TSB) curve swings nicely positive — good for a screenshot.
+ * the form (TSB) curve swings nicely positive - good for a screenshot.
  */
 export function generateSampleActivities(opts: SampleOptions = {}): Activity[] {
   const { days = 540, endDate = toDayKey(new Date()), seed = 42 } = opts

@@ -11,7 +11,7 @@ const TONE_CLASS: Record<FormTone, string> = {
 }
 
 function Delta({ value }: { value: number }) {
-  if (Math.abs(value) < 0.5) return <span className="text-xs text-muted-foreground">— flat</span>
+  if (Math.abs(value) < 0.5) return <span className="text-xs text-muted-foreground">flat</span>
   const up = value > 0
   const Icon = up ? TrendingUp : TrendingDown
   return (
